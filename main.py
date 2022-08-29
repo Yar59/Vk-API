@@ -29,13 +29,14 @@ def get_comic(comics_dir):
     pic_extension = os.path.splitext(urlparse(current_comic['img']).path)[1]
     comic_path = os.path.join(
         comics_dir,
-        f'{current_comic["num"]}.{current_comic["title"]}.{pic_extension}')
+        f'{current_comic["num"]}.{current_comic["title"]}{pic_extension}'
+    )
     save_pic(current_comic['img'], comic_path)
 
-    return current_comic['alt']
+    return current_comic['alt'], comic_path
 
 
-def get_upload_link(access_token, group_id, user_id):
+def get_upload_link(access_token, user_id, group_id):
     url = os.path.join(VK_API_BASE_URL, 'photos.getWallUploadServer')
     payload = {
         'access_token': access_token,
@@ -44,9 +45,21 @@ def get_upload_link(access_token, group_id, user_id):
         'group_id': group_id,
     }
     response = requests.get(url, params=payload)
+    response.raise_for_status()
     check_vk_response(response)
 
     return response.json()['response']['upload_url']
+
+
+def upload_comic(upload_link, comic_path):
+    with open(comic_path, 'rb') as photo:
+        files = {
+            'photo': photo
+        }
+        response = requests.post(upload_link, files=files)
+        response.raise_for_status()
+        check_vk_response(response)
+        return response.json()
 
 
 if __name__ == '__main__':
@@ -60,8 +73,10 @@ if __name__ == '__main__':
 
     while True:
         try:
-            get_comic(comics_dir)
-            upload_link = get_upload_link(access_token, group_id, user_id)
+            comic_alt, comic_path = get_comic(comics_dir)
+            upload_link = get_upload_link(access_token, user_id, group_id)
+            uploaded_photo = upload_comic(upload_link, comic_path)
+
             break
         except requests.exceptions.HTTPError as error:
             logging.warning(f'Ошибка при HTTP запросе: {error}')
@@ -71,5 +86,5 @@ if __name__ == '__main__':
             sleep(5)
             logging.warning('Попытка переподключения')
         except VkError:
-            logging.warning('Ошибка в ответе от сервера ВКонтакте. Смотри ответ выше')
+            logging.warning('Ошибка в ответе от сервера ВКонтакте. Смотри ответ выше.')
             break
