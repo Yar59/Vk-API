@@ -1,5 +1,6 @@
 import logging
 import os
+import random
 from urllib.parse import urlparse
 from time import sleep
 
@@ -21,19 +22,26 @@ def check_vk_response(response):
         raise VkError
 
 
-def get_comic(comics_dir):
-    url = 'https://xkcd.com/info.0.json'
-    response = requests.get(url)
-    current_comic = response.json()
+def get_random_comic(comics_dir):
+    current_comic_url = 'https://xkcd.com/info.0.json'
+    response = requests.get(current_comic_url)
+    response.raise_for_status()
+    current_comic_number = response.json()['num']
 
-    pic_extension = os.path.splitext(urlparse(current_comic['img']).path)[1]
+    random_comic_number = random.randint(1, current_comic_number)
+    random_comic_url = f'https://xkcd.com/{random_comic_number}/info.0.json'
+    response = requests.get(random_comic_url)
+    response.raise_for_status()
+    random_comic = response.json()
+
+    pic_extension = os.path.splitext(urlparse(random_comic['img']).path)[1]
     comic_path = os.path.join(
         comics_dir,
-        f'{current_comic["num"]}.{current_comic["title"]}{pic_extension}'
+        f'{random_comic_number}.{random_comic["safe_title"]}{pic_extension}'
     )
-    save_pic(current_comic['img'], comic_path)
+    save_pic(random_comic['img'], comic_path)
 
-    return current_comic['alt'], comic_path
+    return random_comic['alt'], comic_path
 
 
 def get_upload_link(access_token, user_id, group_id):
@@ -104,7 +112,7 @@ if __name__ == '__main__':
 
     while True:
         try:
-            comic_alt, comic_path = get_comic(comics_dir)
+            comic_alt, comic_path = get_random_comic(comics_dir)
             upload_link = get_upload_link(access_token, user_id, group_id)
             uploaded_photo = upload_comic(upload_link, comic_path)
             photo_id = save_in_album(access_token, group_id, uploaded_photo)
@@ -120,3 +128,8 @@ if __name__ == '__main__':
         except VkError:
             logging.warning('Ошибка в ответе от сервера ВКонтакте. Смотри ответ выше.')
             break
+        finally:
+            files_in_dir = os.listdir(comics_dir)
+            for filename in files_in_dir:
+                os.remove(os.path.join(comics_dir, filename))
+            os.rmdir(comics_dir)
