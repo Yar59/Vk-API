@@ -62,6 +62,22 @@ def upload_comic(upload_link, comic_path):
         return response.json()
 
 
+def save_in_album(access_token, group_id, uploaded_photo):
+    url = 'https://api.vk.com/method/photos.saveWallPhoto'
+    payload = {
+        'access_token': access_token,
+        'group_id': group_id,
+        'server': uploaded_photo['server'],
+        'photo': uploaded_photo['photo'],
+        'hash': uploaded_photo['hash'],
+        'v': '5.131'
+    }
+    response = requests.post(url, params=payload)
+    response.raise_for_status()
+    check_vk_response(response)
+    return response.json()["response"][0]["id"]
+
+
 if __name__ == '__main__':
     load_dotenv()
     comics_dir = os.getenv('COMICS_DIR', './comics')
@@ -76,7 +92,7 @@ if __name__ == '__main__':
             comic_alt, comic_path = get_comic(comics_dir)
             upload_link = get_upload_link(access_token, user_id, group_id)
             uploaded_photo = upload_comic(upload_link, comic_path)
-
+            photo_id = save_in_album(access_token, group_id, uploaded_photo)
             break
         except requests.exceptions.HTTPError as error:
             logging.warning(f'Ошибка при HTTP запросе: {error}')
