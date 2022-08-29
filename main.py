@@ -63,7 +63,7 @@ def upload_comic(upload_link, comic_path):
 
 
 def save_in_album(access_token, group_id, uploaded_photo):
-    url = 'https://api.vk.com/method/photos.saveWallPhoto'
+    url = os.path.join(VK_API_BASE_URL, 'photos.saveWallPhoto')
     payload = {
         'access_token': access_token,
         'group_id': group_id,
@@ -76,6 +76,21 @@ def save_in_album(access_token, group_id, uploaded_photo):
     response.raise_for_status()
     check_vk_response(response)
     return response.json()["response"][0]["id"]
+
+
+def post_comic_to_wall(access_token, group_id, user_id, comic_alt, photo_id):
+    url = os.path.join(VK_API_BASE_URL, 'wall.post')
+    params = {
+        'access_token': access_token,
+        'owner_id': -int(group_id),
+        'from_group': 1,
+        'message': comic_alt,
+        'attachments': f'photo{user_id}_{photo_id}',
+        'v': '5.131'
+    }
+    response = requests.post(url, params=params)
+    response.raise_for_status()
+    check_vk_response(response)
 
 
 if __name__ == '__main__':
@@ -93,6 +108,7 @@ if __name__ == '__main__':
             upload_link = get_upload_link(access_token, user_id, group_id)
             uploaded_photo = upload_comic(upload_link, comic_path)
             photo_id = save_in_album(access_token, group_id, uploaded_photo)
+            post_comic_to_wall(access_token, group_id, user_id, comic_alt, photo_id)
             break
         except requests.exceptions.HTTPError as error:
             logging.warning(f'Ошибка при HTTP запросе: {error}')
