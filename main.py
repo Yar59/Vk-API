@@ -1,8 +1,8 @@
 import logging
 import os
 import random
-from urllib.parse import urlparse
 from time import sleep
+from urllib.parse import urlparse
 
 import requests
 from dotenv import load_dotenv
