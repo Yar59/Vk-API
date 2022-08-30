@@ -1,7 +1,6 @@
 import logging
 import os
 import random
-from time import sleep
 from urllib.parse import urlparse
 
 import requests
