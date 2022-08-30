@@ -65,9 +65,9 @@ def upload_comic(upload_link, comic_path):
             'photo': photo
         }
         response = requests.post(upload_link, files=files)
-        response.raise_for_status()
-        check_vk_response(response)
-        return response.json()
+    response.raise_for_status()
+    check_vk_response(response)
+    return response.json()
 
 
 def save_in_album(access_token, group_id, uploaded_photo):
