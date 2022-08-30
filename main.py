@@ -117,15 +117,15 @@ if __name__ == '__main__':
             photo_id = save_in_album(access_token, group_id, uploaded_photo)
             post_comic_to_wall(access_token, group_id, user_id, comic_alt, photo_id)
             break
-        except requests.exceptions.HTTPError as error:
-            logging.warning(f'Ошибка при HTTP запросе: {error}')
+        except requests.exceptions.HTTPError:
+            logging.exception(f'Ошибка при HTTP запросе')
             break
         except requests.exceptions.ConnectionError or requests.exceptions.ReadTimeout:
-            logging.warning('Ошибка подключения, проверьте сеть интернет.')
+            logging.exception('Ошибка подключения, проверьте сеть интернет.')
             sleep(5)
-            logging.warning('Попытка переподключения')
+            logging.exception('Попытка переподключения')
         except VkError:
-            logging.warning('Ошибка в ответе от сервера ВКонтакте. Смотри ответ выше.')
+            logging.exception('Ошибка в ответе от сервера ВКонтакте. Смотри ответ выше.')
             break
         finally:
             files_in_dir = os.listdir(comics_dir)
