@@ -110,26 +110,20 @@ if __name__ == '__main__':
     user_id = os.environ['USER_ID']
     os.makedirs(comics_dir, exist_ok=True)
 
-    while True:
-        try:
-            comic_alt, comic_path = fetch_random_comic(comics_dir)
-            upload_link = get_upload_link(access_token, user_id, group_id)
-            uploaded_photo_server, uploaded_photo_photo, uploaded_photo_hash = upload_comic(upload_link, comic_path)
-            photo_id = save_in_album(access_token, group_id, uploaded_photo_server, uploaded_photo_photo, uploaded_photo_hash)
-            post_comic_to_wall(access_token, group_id, user_id, comic_alt, photo_id)
-            break
-        except requests.exceptions.HTTPError:
-            logging.exception(f'Ошибка при HTTP запросе')
-            break
-        except requests.exceptions.ConnectionError or requests.exceptions.ReadTimeout:
-            logging.exception('Ошибка подключения, проверьте сеть интернет.')
-            sleep(5)
-            logging.exception('Попытка переподключения')
-        except VkError:
-            logging.exception('Ошибка в ответе от сервера ВКонтакте. Смотри ответ выше.')
-            break
-        finally:
-            files_in_dir = os.listdir(comics_dir)
-            for filename in files_in_dir:
-                os.remove(os.path.join(comics_dir, filename))
-            os.rmdir(comics_dir)
+    try:
+        comic_alt, comic_path = fetch_random_comic(comics_dir)
+        upload_link = get_upload_link(access_token, user_id, group_id)
+        uploaded_photo_server, uploaded_photo_photo, uploaded_photo_hash = upload_comic(upload_link, comic_path)
+        photo_id = save_in_album(access_token, group_id, uploaded_photo_server, uploaded_photo_photo, uploaded_photo_hash)
+        post_comic_to_wall(access_token, group_id, user_id, comic_alt, photo_id)
+    except requests.exceptions.HTTPError:
+        logging.exception(f'Ошибка при HTTP запросе')
+    except requests.exceptions.ConnectionError or requests.exceptions.ReadTimeout:
+        logging.exception('Ошибка подключения, проверьте сеть интернет.')
+    except VkError:
+        logging.exception('Ошибка в ответе от сервера ВКонтакте. Смотри ответ выше.')
+    finally:
+        files_in_dir = os.listdir(comics_dir)
+        for filename in files_in_dir:
+            os.remove(os.path.join(comics_dir, filename))
+        os.rmdir(comics_dir)
