@@ -22,7 +22,7 @@ def check_vk_response(response):
         raise VkError
 
 
-def get_random_comic(comics_dir):
+def fetch_random_comic(comics_dir):
     current_comic_url = 'https://xkcd.com/info.0.json'
     response = requests.get(current_comic_url)
     response.raise_for_status()
@@ -111,7 +111,7 @@ if __name__ == '__main__':
 
     while True:
         try:
-            comic_alt, comic_path = get_random_comic(comics_dir)
+            comic_alt, comic_path = fetch_random_comic(comics_dir)
             upload_link = get_upload_link(access_token, user_id, group_id)
             uploaded_photo = upload_comic(upload_link, comic_path)
             photo_id = save_in_album(access_token, group_id, uploaded_photo)
