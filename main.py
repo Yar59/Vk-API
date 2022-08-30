@@ -90,7 +90,7 @@ def post_comic_to_wall(access_token, group_id, user_id, comic_alt, photo_id):
     url = os.path.join(VK_API_BASE_URL, 'wall.post')
     params = {
         'access_token': access_token,
-        'owner_id': -int(group_id),
+        'owner_id': f'-{group_id}',
         'from_group': 1,
         'message': comic_alt,
         'attachments': f'photo{user_id}_{photo_id}',
