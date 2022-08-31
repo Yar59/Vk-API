@@ -70,14 +70,14 @@ def upload_comic(upload_link, comic_path):
     return uploaded_photo_params['server'], uploaded_photo_params['photo'], uploaded_photo_params['hash']
 
 
-def save_in_album(access_token, group_id, photo_server, photo_information, photo_hash):
+def save_in_album(access_token, group_id, comic_server, comic_information, comic_hash):
     url = os.path.join(VK_API_BASE_URL, 'photos.saveWallPhoto')
     payload = {
         'access_token': access_token,
         'group_id': group_id,
-        'server': photo_server,
-        'photo': photo_information,
-        'hash': photo_hash,
+        'server': comic_server,
+        'photo': comic_information,
+        'hash': comic_hash,
         'v': '5.131'
     }
     response = requests.post(url, params=payload)
@@ -112,8 +112,8 @@ if __name__ == '__main__':
     try:
         comic_alt, comic_path = fetch_random_comic(comics_dir)
         upload_link = get_upload_link(access_token, user_id, group_id)
-        photo_server, photo_information, photo_hash = upload_comic(upload_link, comic_path)
-        photo_id = save_in_album(access_token, group_id, photo_server, photo_information, photo_hash)
+        comic_server, comic_information, comic_hash = upload_comic(upload_link, comic_path)
+        photo_id = save_in_album(access_token, group_id, comic_server, comic_information, comic_hash)
         post_comic_to_wall(access_token, group_id, user_id, comic_alt, photo_id)
     except requests.exceptions.HTTPError:
         logging.exception(f'Ошибка при HTTP запросе')
