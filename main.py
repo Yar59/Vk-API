@@ -67,10 +67,15 @@ def upload_comic(upload_link, comic_path):
     response.raise_for_status()
     check_vk_response(response)
     uploaded_photo_params = response.json()
-    return uploaded_photo_params['server'], uploaded_photo_params['photo'], uploaded_photo_params['hash']
+    return uploaded_photo_params['server'],\
+        uploaded_photo_params['photo'],\
+        uploaded_photo_params['hash']
 
 
-def save_in_album(access_token, group_id, comic_server, comic_information, comic_hash):
+def save_in_album(
+    access_token, group_id,
+    comic_server, comic_information, comic_hash
+):
     url = os.path.join(VK_API_BASE_URL, 'photos.saveWallPhoto')
     payload = {
         'access_token': access_token,
@@ -112,15 +117,33 @@ if __name__ == '__main__':
     try:
         comic_alt, comic_path = fetch_random_comic(comics_dir)
         upload_link = get_upload_link(access_token, user_id, group_id)
-        comic_server, comic_information, comic_hash = upload_comic(upload_link, comic_path)
-        photo_id = save_in_album(access_token, group_id, comic_server, comic_information, comic_hash)
-        post_comic_to_wall(access_token, group_id, user_id, comic_alt, photo_id)
+        comic_server, comic_information, comic_hash\
+            = upload_comic(upload_link, comic_path)
+        photo_id = save_in_album(
+            access_token,
+            group_id,
+            comic_server,
+            comic_information,
+            comic_hash
+        )
+        post_comic_to_wall(
+            access_token,
+            group_id,
+            user_id,
+            comic_alt,
+            photo_id
+        )
     except requests.exceptions.HTTPError:
         logging.exception(f'Ошибка при HTTP запросе')
-    except requests.exceptions.ConnectionError or requests.exceptions.ReadTimeout:
+    except (
+        requests.exceptions.ConnectionError,
+        requests.exceptions.ReadTimeout
+    ):
         logging.exception('Ошибка подключения, проверьте сеть интернет.')
     except VkError:
-        logging.exception('Ошибка в ответе от сервера ВКонтакте. Смотри ответ выше.')
+        logging.exception(
+            'Ошибка в ответе от сервера ВКонтакте. Смотри ответ выше.'
+        )
     finally:
         files_in_dir = os.listdir(comics_dir)
         for filename in files_in_dir:
