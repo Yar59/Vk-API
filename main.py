@@ -117,8 +117,10 @@ if __name__ == '__main__':
     try:
         comic_alt, comic_path = fetch_random_comic(comics_dir)
         upload_link = get_upload_link(access_token, user_id, group_id)
-        comic_server, comic_information, comic_hash\
-            = upload_comic(upload_link, comic_path)
+        comic_server, comic_information, comic_hash = upload_comic(
+            upload_link,
+            comic_path
+        )
         photo_id = save_in_album(
             access_token,
             group_id,
